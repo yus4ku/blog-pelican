@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta name="author" content="yusaku" />
+        <meta name="copyright" content="yusaku" />
+        
+                <meta name="keywords" content="Bash, Linux, " />
+        <title>bash のビルトインコマンド “local” について  · いままでのこと
+</title>
+                <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+                <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+                    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>いままでのこと</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                                                                                    <li ><a href="/pages/about.html">About</a></li>
+                                                                                    <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+                    <article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/2010/11/23/bash-のビルトインコマンド-local-について/"> bash のビルトインコマンド “local” について  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+            <div class="span8 offset2 article-content">
+            
+            <p>実験のまとめ。</p>
+<div class="section" id="id1">
+<h2>前置き</h2>
+<p>bash では特に指定しない限り、 <em>変数は常にグローバル</em> な変数として扱われてしまいます。</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="k">function </span>foo<span class="o">()</span> <span class="o">{</span>
+    <span class="nv">hoge</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span>
+<span class="o">}</span>
+
+foo
+<span class="nb">echo</span> <span class="nv">$hoge</span> <span class="c"># foo と出力される</span>
+</pre></div>
+<p>変数をつくるたびに、グローバルな領域を汚染していくのはよろしくないので、ここではグローバル化の対策として bash のビルトインコマンド <em>local</em> を使用します。</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="k">function </span>foo<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span><span class="nv">hoge</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span>
+<span class="o">}</span>
+
+foo
+<span class="nb">echo</span> <span class="nv">$hoge</span> <span class="c"># 空出力</span>
+</pre></div>
+<p>このように、明示的に local の変数だよーって宣言してあげると、関数をでたときには忘れる。なんだか逆な気がしますが...。</p>
+</div>
+<div class="section" id="id2">
+<h2>本題</h2>
+<p>bash では <em>for ループに使用する変数</em> や、<em>read で受け取る変数</em> も他の変数と同様に、特に指定しない限りグローバル変数になります。</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="k">function </span>foo<span class="o">()</span> <span class="o">{</span>
+    <span class="k">for </span>hoge in <span class="sb">`</span><span class="nb">echo </span>one two three<span class="sb">`</span>; <span class="k">do</span>
+        :
+    <span class="k">done</span>
+<span class="o">}</span>
+
+<span class="k">function </span>bar<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">read </span>piyo
+<span class="o">}</span>
+
+foo
+bar
+<span class="nb">echo</span> <span class="nv">$hoge</span> <span class="c"># three と出力される</span>
+<span class="nb">echo</span> <span class="nv">$piyo</span> <span class="c"># 入力された文字列が出力される</span>
+</pre></div>
+<p>対策として local を使用したいところですが、 <em>for や read の変数名の前に local を置くと</em> 残念ながら <em>構文エラー</em> になってしまいます。</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="k">function </span>foo<span class="o">()</span> <span class="o">{</span>
+    <span class="k">for </span><span class="nb">local </span>hoge in <span class="sb">`</span><span class="nb">echo </span>one two three<span class="sb">`</span>; <span class="k">do</span> <span class="c"># syntax error</span>
+        :
+    <span class="k">done</span>
+<span class="o">}</span>
+
+<span class="k">function </span>bar<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">read local </span>piyo <span class="c"># syntax error</span>
+<span class="o">}</span>
+</pre></div>
+<p>どうしたものかと頭を抱えるところです...。</p>
+<p>でも実はそのあたりもちゃんと対策されていて、一度 local コマンドに名前を渡すと、 <em>同じスコープ内ではその変数名はずっとローカル</em> として扱う特性があります。具体的には以下のように。</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="k">function </span>foo<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span>hoge <span class="c"># 一度 local と宣言したら</span>
+    <span class="nv">hoge</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span> <span class="c"># global っぽく代入しても local として扱われる</span>
+<span class="o">}</span>
+
+foo
+<span class="nb">echo</span> <span class="nv">$hoge</span> <span class="c"># 空出力</span>
+</pre></div>
+<p>すこし誤解を招きそうなこの特性ですが、これを利用して先程の for や read の問題も解決できます。</p>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="k">function </span>foo<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span>hoge
+    <span class="k">for </span>hoge in <span class="sb">`</span><span class="nb">echo </span>one two three<span class="sb">`</span>; <span class="k">do</span>
+        :
+    <span class="k">done</span>
+<span class="o">}</span>
+
+<span class="k">function </span>bar<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span>piyo
+    <span class="nb">read </span>bar
+<span class="o">}</span>
+
+foo
+bar
+<span class="nb">echo</span> <span class="nv">$hoge</span> <span class="c"># 空出力</span>
+<span class="nb">echo</span> <span class="nv">$piyo</span> <span class="c"># 空出力</span>
+</pre></div>
+</div>
+<div class="section" id="id3">
+<h2>余談</h2>
+<p>実験中に発見したのですが、zsh だと以下は構文エラーになりません。</p>
+<div class="highlight"><pre><span class="c">#!/bin/zsh</span>
+
+<span class="k">function </span>foo<span class="o">()</span> <span class="o">{</span>
+    <span class="k">for </span><span class="nb">local </span>hoge in <span class="sb">`</span><span class="nb">echo </span>one two three<span class="sb">`</span>; <span class="k">do</span>
+        :
+    <span class="k">done</span>
+<span class="o">}</span>
+
+<span class="k">function </span>bar<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">read local </span>piyo
+<span class="o">}</span>
+</pre></div>
+<p>bash も将来的にはできるようになるかもしれませんね。</p>
+</div>
+
+                        <aside>
+            <hr/>
+                                                                                                                                                                                                                        <nav>
+            <ul class="articles_timeline">
+                                                                     
+                <li class="previous_article">« <a href="/2010/11/20/nouveauでデュアルモニタの設定をしてみた/" title="Previous: nouveauでデュアルモニタの設定をしてみた">nouveauでデュアルモニタの設定をしてみた</a></li>
+                                                                                     
+                <li class="next_article"><a href="/2011/01/22/guacamoleでウェブブラウザからデスクトップ環境を使っ/" title="Next: Guacamoleでウェブブラウザからデスクトップ環境を使ってみた">Guacamoleでウェブブラウザからデスクトップ環境を使ってみた</a> »</li>
+                            </ul>
+            </nav>
+                                                                                                                                    </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+             
+            <h4>Published</h4>
+                        <time pubdate="pubdate" datetime="2010-11-23T19:52:00">Nov 23, 2010</time>
+                                                <h4>Category</h4>
+            <a class="category-link" href="/categories.html#Linux-ref">Linux</a> 
+                                    <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                                <li><a href="/tags.html#Bash-ref">Bash
+                                        <span>1</span>
+                    </a></li>
+                            </ul>
+            
+                    </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+        <footer>
+<div id="footer">
+    <ul class="footer-content">
+                        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>                    <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        
+            </body>
+</html>

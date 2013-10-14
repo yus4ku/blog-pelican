@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta name="author" content="yusaku" />
+        <meta name="copyright" content="yusaku" />
+        
+                <meta name="keywords" content="Debian, Linux, " />
+        <title>acpid を使ってサスペンド  · いままでのこと
+</title>
+                <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+                <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+                    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>いままでのこと</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                                                                                    <li ><a href="/pages/about.html">About</a></li>
+                                                                                    <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+                    <article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/2011/08/20/acpid-を使ってサスペンド/"> acpid を使ってサスペンド  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+            <div class="span8 offset2 article-content">
+            
+            <p>ノート PC のモニタ開閉時に acpid を使ってサスペンド/復帰する設定を行いました。</p>
+<ul class="simple">
+<li>ThinkPad X60</li>
+<li>Debian GNU/Linux wheezy</li>
+</ul>
+<div class="section" id="id1">
+<h2>はじめに</h2>
+<p>acpid では ACPI イベントを捕捉して、それに応じたアクションを実行できます。</p>
+<p>シンプルな仕組みで、設定も簡単。動作は自由に定義できるので便利です。</p>
+<p>acpid については以下のサイトに詳しいです。</p>
+<ul class="simple">
+<li><a class="reference external" href="https://wiki.archlinux.org/index.php/Acpid">Acpid - ArchWiki</a></li>
+<li><a class="reference external" href="http://nekolinux.blogspot.com/2009/10/acpi.html">りぬーめも Arch Linux on S101: acpiの仕組みとか</a></li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>イベントの確認</h2>
+<p>イベントは <em>acpi_listen</em> コマンドで確認できます。</p>
+<p>acpi_listen コマンドを実行してノート PC のモニタをパタパタさせてみたところ、lid イベントが発生していることが確認できました。</p>
+<div class="highlight"><pre>$ acpi_listen
+button/lid LID close
+video/switchmode VMOD 00000080 00000000
+processor LNXCPU:00 00000081 00000000
+button/lid LID open
+</pre></div>
+</div>
+<div class="section" id="id3">
+<h2>アクションの定義</h2>
+<p>イベントに対するアクションは <em>/etc/acpi/events/</em> 以下で定義します。</p>
+<div class="highlight"><pre>$ ls /etc/acpi/events/
+ac                    lenovo-undock          thinkpad-volume-up
+asus-brightness-down  lidbtn                 tosh-battery
+asus-brightness-up    panasonic-lockbtn      tosh-hibernate
+...
+</pre></div>
+<p>定義は非常にシンプルです。</p>
+<div class="highlight"><pre>$ cat /etc/acpi/events/sleepbtn
+event=button[ /]sleep
+action=/etc/acpi/sleep.sh
+</pre></div>
+<p><em>event</em> には捕捉したいイベントを識別する文字列を指定。正規表現も使えるようです。<em>action</em> にはイベントが発生した際に実行するコマンドを指定。</p>
+</div>
+<div class="section" id="id4">
+<h2>設定してみる</h2>
+<p>ノート PC のモニタを閉じたときにサスペンドさせる設定を追加してみます。</p>
+<p>イベントは acpi_listen コマンドで確認したところ、モニタを閉じたときに button/lid LID close が発生しているので、それを捕捉します。</p>
+<p>アクションは自分でスクリプトを用意することもできますが、/etc/acpi/ に様々なスクリプトが用意されていたので、今回はこれを使いました。</p>
+<p>設定が終わったら acpid を再起動します。</p>
+<div class="highlight"><pre>$ sudo nano -wk /etc/acpi/events/thinkpad-suspend
+event=button[ /]lid LID close
+action=/etc/acpi/sleep.sh
+$ sudo /etc/init.d/acpid restart
+</pre></div>
+<p>これで設定完了。</p>
+<p>ノート PC のモニタを閉じるとちゃんとサスペンドされました。</p>
+</div>
+<div class="section" id="id5">
+<h2>画面がロックされない</h2>
+<p>サスペンドはできたものの、なぜか画面のロックがされず、なんだか気持ちが悪い状態。</p>
+<p>アクションとして指定した /etc/acpi/sleep.sh を見てみると、xscreensaver の起動を確認し、起動されている場合には xscreensaver-command -lock を実行するようになっていました。サスペンド自体は pm-utils の pm-suspend で実現されています。</p>
+<p>なので xscreensaver を立ち上げておけばオッケー。</p>
+</div>
+
+                        <aside>
+            <hr/>
+                                                                                                                                                                        <nav>
+            <ul class="articles_timeline">
+                                                                     
+                <li class="previous_article">« <a href="/2011/01/22/guacamoleでウェブブラウザからデスクトップ環境を使っ/" title="Previous: Guacamoleでウェブブラウザからデスクトップ環境を使ってみた">Guacamoleでウェブブラウザからデスクトップ環境を使ってみた</a></li>
+                                                                                     
+                <li class="next_article"><a href="/2013/09/28/linux-3-x-の仮想マシンから-vmware-fusion-の共有フォルダが見えな/" title="Next: Linux 3.x の仮想マシンから VMware Fusion の共有フォルダが見えない">Linux 3.x の仮想マシンから VMware Fusion の共有フォルダが見えない</a> »</li>
+                            </ul>
+            </nav>
+                                                                                                                                                                                    </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+             
+            <h4>Published</h4>
+                        <time pubdate="pubdate" datetime="2011-08-20T22:58:00">Aug 20, 2011</time>
+                                                <h4>Category</h4>
+            <a class="category-link" href="/categories.html#Linux-ref">Linux</a> 
+                                    <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                                <li><a href="/tags.html#Debian-ref">Debian
+                                        <span>4</span>
+                    </a></li>
+                            </ul>
+            
+                    </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+        <footer>
+<div id="footer">
+    <ul class="footer-content">
+                        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>                    <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        
+            </body>
+</html>
