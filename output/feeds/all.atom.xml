@@ -1,5 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>いままでのこと</title><link href="http://blog.tekito.org/" rel="alternate"></link><link href="http://blog.tekito.org/feeds/all.atom.xml" rel="self"></link><id>http://blog.tekito.org/</id><updated>2013-10-14T15:24:00+09:00</updated><entry><title>Pelican へ移行</title><link href="http://blog.tekito.org/2013/10/14/blogging-with-pelican/" rel="alternate"></link><updated>2013-10-14T15:24:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-14:2013/10/14/blogging-with-pelican/</id><summary type="html">&lt;p&gt;Blog を Wordpress から &lt;a class="reference external" href="http://getpelican.com/"&gt;Pelican&lt;/a&gt; へ移行しました。&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>いままでのこと</title><link href="http://blog.tekito.org/" rel="alternate"></link><link href="http://blog.tekito.org/feeds/all.atom.xml" rel="self"></link><id>http://blog.tekito.org/</id><updated>2013-10-18T00:00:00+09:00</updated><entry><title>MXE + Qt を使って Linux で Windows GUI アプリをクロスビルドする</title><link href="http://blog.tekito.org/2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/" rel="alternate"></link><updated>2013-10-18T00:00:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-18:2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/</id><summary type="html">&lt;a class="reference external image-reference" href="http://blog.tekito.org/static/data/2013/10/18/sample.jpg"&gt;&lt;img alt="Hello, Windows!" src="http://blog.tekito.org/static/data/2013/10/18/sample.jpg" style="width: 400px;" /&gt;&lt;/a&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;環境&lt;/h2&gt;
+&lt;p&gt;Debian GNU/Linux jessie amd-64 (Linux 3.10.11)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="debian"&gt;
+&lt;h2&gt;依存パッケージのインストール (Debian)&lt;/h2&gt;
+&lt;p&gt;まずは &lt;a class="reference external" href="http://mxe.cc/#requirements-debian"&gt;MXE のドキュメント&lt;/a&gt; に従って、必要なパッケージをインストールします。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;$ apt-get install autoconf automake bash bison bzip2 \
+                  cmake flex gettext git g++ intltool \
+                  libffi-dev libtool libltdl-dev libssl-dev \
+                  libxml-parser-perl make openssl patch perl \
+                  pkg-config scons sed unzip wget xz-utils
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="mxe-windows-qt"&gt;
+&lt;h2&gt;MXE で Windows 向けの Qt ビルド環境を作成する&lt;/h2&gt;
+&lt;p&gt;MXE は Debian のパッケージリポジトリにはありません。&lt;/p&gt;
+&lt;p&gt;ソースコードが Github にありますので git clone して make します。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;$ git clone https://github.com/mxe/mxe.git
+$ cd mxe &amp;amp;&amp;amp; make qt5
+(make qt すると Qt4 用の環境ができてしまうので make qt5 しました。)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;ビルドにはとても時間がかかります。僕の環境では 1 時間くらいかかりました。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;クロスビルドする&lt;/h2&gt;
+&lt;p&gt;mxe ディレクトリ以下の実行ファイルやライブラリを使ってビルドします。&lt;/p&gt;
+&lt;p&gt;手順はパスを通して qmake -&amp;gt; make でできます。ビルドするときに qmake -project は必要ありませんでした。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;$ export PATH=&amp;quot;/path/to/mxe/usr/bin/:${PATH}&amp;quot;
+$ cd /path/to/your/qt-project/
+$ /path/to/mxe/usr/i686-pc-mingw32/qt5/bin/qmake &amp;amp;&amp;amp; make
+
+(Qt4 をビルドした場合 qmake のパスが異なります)
+$ /path/to/mxe/usr/i686-pc-mingw32/qt/bin/qmake &amp;amp;&amp;amp; make
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;ビルドに成功すると release/ 以下に .exe ファイルが生成されます。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;$ ls release/*.exe
+release/sample.exe
+$ file release/sample.exe
+release/sample.exe: PE32 executable (GUI) Intel 80386 (stripped to external PDB), for MS Windows
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h2&gt;サンプル&lt;/h2&gt;
+&lt;p&gt;クロスビルドを試すためのサンプルコードを Github に置きました。ウィンドウを表示するだけの簡単なものです。必要であればお使いください。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;$ git clone https://github.com/yus4ku/qt-mxe-sample.git
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id4"&gt;
+&lt;h2&gt;所感&lt;/h2&gt;
+&lt;p&gt;試しに Qt5 で WebKit を使ったアプリを作ってみましたが、MXE 側のライブラリが不足していてビルドできませんでした。make qt すると Qt4 の環境が作成されるあたり、まだ Qt5 は非推奨なのかもしれません。&lt;/p&gt;
+&lt;p&gt;Qt Creator でも同等のことができそう、且つ Qt 的には王道っぽいので、そっちも近日中に試してみようと思います。&lt;/p&gt;
+&lt;/div&gt;
+</summary><category term="Qt"></category><category term="MXE"></category><category term="Debian"></category></entry><entry><title>Pelican へ移行</title><link href="http://blog.tekito.org/2013/10/14/blogging-with-pelican/" rel="alternate"></link><updated>2013-10-14T15:24:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-14:2013/10/14/blogging-with-pelican/</id><summary type="html">&lt;p&gt;Blog を Wordpress から &lt;a class="reference external" href="http://getpelican.com/"&gt;Pelican&lt;/a&gt; へ移行しました。&lt;/p&gt;
 </summary></entry><entry><title>Linux 3.x の仮想マシンから VMware Fusion の共有フォルダが見えない</title><link href="http://blog.tekito.org/2013/09/28/linux-3-x-%E3%81%AE%E4%BB%AE%E6%83%B3%E3%83%9E%E3%82%B7%E3%83%B3%E3%81%8B%E3%82%89-vmware-fusion-%E3%81%AE%E5%85%B1%E6%9C%89%E3%83%95%E3%82%A9%E3%83%AB%E3%83%80%E3%81%8C%E8%A6%8B%E3%81%88%E3%81%AA/" rel="alternate"></link><updated>2013-09-28T01:57:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-09-28:2013/09/28/linux-3-x-の仮想マシンから-vmware-fusion-の共有フォルダが見えな/</id><summary type="html">&lt;p&gt;VMware Fusion 上の Linux 仮想マシンから Mac の共有フォルダが見えなくなることが、たびたび (Linux カーネルをアップデートするたび？) あります。&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;$ ls /mnt/hgfs/
 (見えない...。)
