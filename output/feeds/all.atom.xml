@@ -36,7 +36,7 @@ SIGTERM is blocked.
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;fork() したあとに exec() 系の関数を呼び出したりすると、ブロックされた状態で処理が継続するようなので思わぬ結果になります。&lt;/p&gt;
 &lt;p&gt;fork() 前に pending 状態のシグナルは子プロセスには引き継がれません。&lt;/p&gt;
-</summary><category term=""></category></entry><entry><title>MXE + Qt を使って Linux で Windows GUI アプリをクロスビルドする</title><link href="http://blog.tekito.org/2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/" rel="alternate"></link><updated>2013-10-18T00:00:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-18:2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/</id><summary type="html">&lt;a class="reference external image-reference" href="http://blog.tekito.org/static/data/2013/10/18/sample.jpg"&gt;&lt;img alt="Hello, Windows!" src="http://blog.tekito.org/static/data/2013/10/18/sample.jpg" style="width: 400px;" /&gt;&lt;/a&gt;
+</summary><category term="C/C++"></category></entry><entry><title>MXE + Qt を使って Linux で Windows GUI アプリをクロスビルドする</title><link href="http://blog.tekito.org/2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/" rel="alternate"></link><updated>2013-10-18T00:00:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-18:2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/</id><summary type="html">&lt;a class="reference external image-reference" href="http://blog.tekito.org/static/data/2013/10/18/sample.jpg"&gt;&lt;img alt="Hello, Windows!" src="http://blog.tekito.org/static/data/2013/10/18/sample.jpg" style="width: 400px;" /&gt;&lt;/a&gt;
 &lt;div class="section" id="id1"&gt;
 &lt;h2&gt;環境&lt;/h2&gt;
 &lt;p&gt;Debian GNU/Linux jessie amd-64 (Linux 3.10.11)&lt;/p&gt;
