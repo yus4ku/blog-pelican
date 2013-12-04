@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>いままでのこと</title><link href="http://blog.tekito.org/" rel="alternate"></link><link href="http://blog.tekito.org/feeds/all.atom.xml" rel="self"></link><id>http://blog.tekito.org/</id><updated>2013-12-03T23:30:00+09:00</updated><entry><title>シグナルをブロックすると fork() 後の子プロセスもブロックされた状態で生成される</title><link href="http://blog.tekito.org/2013/12/03/signal-state-will-be-inherited-by-child-process/" rel="alternate"></link><updated>2013-12-03T23:30:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-12-03:2013/12/03/signal-state-will-be-inherited-by-child-process/</id><summary type="html">&lt;p&gt;シグナルをブロックした状態で fork() すると、子プロセスもシグナルをブロックした状態で生成されます。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#include &amp;lt;unistd.h&amp;gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#include &amp;lt;cstdio&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;cstdlib&amp;gt;&lt;/span&gt;
 &lt;span class="cp"&gt;#include &amp;lt;csignal&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;unistd.h&amp;gt;&lt;/span&gt;
 &lt;span class="cp"&gt;#include &amp;lt;iostream&amp;gt;&lt;/span&gt;
 
 &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -17,6 +19,7 @@
     &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pid&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
         &lt;span class="cm"&gt;/* child */&lt;/span&gt;
         &lt;span class="kt"&gt;sigset_t&lt;/span&gt; &lt;span class="n"&gt;checkmask&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;sigemptyset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;checkmask&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
         &lt;span class="n"&gt;sigprocmask&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;checkmask&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
         &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sigismember&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;checkmask&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SIGTERM&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
             &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;cout&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;SIGTERM is blocked.&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;endl&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -36,7 +39,7 @@ SIGTERM is blocked.
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;fork() したあとに exec() 系の関数を呼び出したりすると、ブロックされた状態で処理が継続するようなので思わぬ結果になります。&lt;/p&gt;
 &lt;p&gt;fork() 前に pending 状態のシグナルは子プロセスには引き継がれません。&lt;/p&gt;
-</summary><category term="C/C++"></category></entry><entry><title>MXE + Qt を使って Linux で Windows GUI アプリをクロスビルドする</title><link href="http://blog.tekito.org/2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/" rel="alternate"></link><updated>2013-10-18T00:00:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-18:2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/</id><summary type="html">&lt;a class="reference external image-reference" href="http://blog.tekito.org/static/data/2013/10/18/sample.jpg"&gt;&lt;img alt="Hello, Windows!" src="http://blog.tekito.org/static/data/2013/10/18/sample.jpg" style="width: 400px;" /&gt;&lt;/a&gt;
+</summary><category term="C/C++"></category><category term="Linux"></category></entry><entry><title>MXE + Qt を使って Linux で Windows GUI アプリをクロスビルドする</title><link href="http://blog.tekito.org/2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/" rel="alternate"></link><updated>2013-10-18T00:00:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-18:2013/10/18/cross-building-on-linux-for-windows-using-mxe-and-qt/</id><summary type="html">&lt;a class="reference external image-reference" href="http://blog.tekito.org/static/data/2013/10/18/sample.jpg"&gt;&lt;img alt="Hello, Windows!" src="http://blog.tekito.org/static/data/2013/10/18/sample.jpg" style="width: 400px;" /&gt;&lt;/a&gt;
 &lt;div class="section" id="id1"&gt;
 &lt;h2&gt;環境&lt;/h2&gt;
 &lt;p&gt;Debian GNU/Linux jessie amd-64 (Linux 3.10.11)&lt;/p&gt;
@@ -90,7 +93,7 @@ release/sample.exe: PE32 executable (GUI) Intel 80386 (stripped to external PDB)
 &lt;p&gt;試しに Qt5 で WebKit を使ったアプリを作ってみましたが、MXE 側のライブラリが不足していてビルドできませんでした。make qt すると Qt4 の環境が作成されるあたり、まだ Qt5 は非推奨なのかもしれません。&lt;/p&gt;
 &lt;p&gt;Qt Creator でも同等のことができそう、且つ Qt 的には王道っぽいので、そっちも近日中に試してみようと思います。&lt;/p&gt;
 &lt;/div&gt;
-</summary><category term="Qt"></category><category term="MXE"></category><category term="Debian"></category></entry><entry><title>Pelican へ移行</title><link href="http://blog.tekito.org/2013/10/14/blogging-with-pelican/" rel="alternate"></link><updated>2013-10-14T15:24:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-14:2013/10/14/blogging-with-pelican/</id><summary type="html">&lt;p&gt;Blog を Wordpress から &lt;a class="reference external" href="http://getpelican.com/"&gt;Pelican&lt;/a&gt; へ移行しました。&lt;/p&gt;
+</summary><category term="Debian"></category><category term="Linux"></category><category term="MXE"></category><category term="Qt"></category></entry><entry><title>Pelican へ移行</title><link href="http://blog.tekito.org/2013/10/14/blogging-with-pelican/" rel="alternate"></link><updated>2013-10-14T15:24:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-10-14:2013/10/14/blogging-with-pelican/</id><summary type="html">&lt;p&gt;Blog を Wordpress から &lt;a class="reference external" href="http://getpelican.com/"&gt;Pelican&lt;/a&gt; へ移行しました。&lt;/p&gt;
 </summary></entry><entry><title>Linux 3.x の仮想マシンから VMware Fusion の共有フォルダが見えない</title><link href="http://blog.tekito.org/2013/09/28/linux-3-x-%E3%81%AE%E4%BB%AE%E6%83%B3%E3%83%9E%E3%82%B7%E3%83%B3%E3%81%8B%E3%82%89-vmware-fusion-%E3%81%AE%E5%85%B1%E6%9C%89%E3%83%95%E3%82%A9%E3%83%AB%E3%83%80%E3%81%8C%E8%A6%8B%E3%81%88%E3%81%AA/" rel="alternate"></link><updated>2013-09-28T01:57:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2013-09-28:2013/09/28/linux-3-x-の仮想マシンから-vmware-fusion-の共有フォルダが見えな/</id><summary type="html">&lt;p&gt;VMware Fusion 上の Linux 仮想マシンから Mac の共有フォルダが見えなくなることが、たびたび (Linux カーネルをアップデートするたび？) あります。&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;$ ls /mnt/hgfs/
 (見えない...。)
@@ -320,7 +323,7 @@ $ ls /mnt/hgfs/
 shared
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;
-</summary><category term="Debian"></category></entry><entry><title>acpid を使ってサスペンド</title><link href="http://blog.tekito.org/2011/08/20/acpid-%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%82%B5%E3%82%B9%E3%83%9A%E3%83%B3%E3%83%89/" rel="alternate"></link><updated>2011-08-20T22:58:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2011-08-20:2011/08/20/acpid-を使ってサスペンド/</id><summary type="html">&lt;p&gt;ノート PC のモニタ開閉時に acpid を使ってサスペンド/復帰する設定を行いました。&lt;/p&gt;
+</summary><category term="Debian"></category><category term="Linux"></category><category term="Mac"></category><category term="VMware"></category></entry><entry><title>acpid を使ってサスペンド</title><link href="http://blog.tekito.org/2011/08/20/acpid-%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%82%B5%E3%82%B9%E3%83%9A%E3%83%B3%E3%83%89/" rel="alternate"></link><updated>2011-08-20T22:58:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2011-08-20:2011/08/20/acpid-を使ってサスペンド/</id><summary type="html">&lt;p&gt;ノート PC のモニタ開閉時に acpid を使ってサスペンド/復帰する設定を行いました。&lt;/p&gt;
 &lt;ul class="simple"&gt;
 &lt;li&gt;ThinkPad X60&lt;/li&gt;
 &lt;li&gt;Debian GNU/Linux wheezy&lt;/li&gt;
@@ -382,7 +385,7 @@ $ sudo /etc/init.d/acpid restart
 &lt;p&gt;アクションとして指定した /etc/acpi/sleep.sh を見てみると、xscreensaver の起動を確認し、起動されている場合には xscreensaver-command -lock を実行するようになっていました。サスペンド自体は pm-utils の pm-suspend で実現されています。&lt;/p&gt;
 &lt;p&gt;なので xscreensaver を立ち上げておけばオッケー。&lt;/p&gt;
 &lt;/div&gt;
-</summary><category term="Debian"></category></entry><entry><title>Guacamoleでウェブブラウザからデスクトップ環境を使ってみた</title><link href="http://blog.tekito.org/2011/01/22/guacamole%E3%81%A7%E3%82%A6%E3%82%A7%E3%83%96%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E3%81%8B%E3%82%89%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E7%92%B0%E5%A2%83%E3%82%92%E4%BD%BF%E3%81%A3/" rel="alternate"></link><updated>2011-01-22T04:26:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2011-01-22:2011/01/22/guacamoleでウェブブラウザからデスクトップ環境を使っ/</id><summary type="html">&lt;p&gt;&lt;a class="reference external" href="http://guacamole.sourceforge.net/"&gt;Guacamole&lt;/a&gt; はHTML5とAjaxで実現されたVNCクライアントです。&lt;/p&gt;
+</summary><category term="Debian"></category><category term="Linux"></category></entry><entry><title>Guacamoleでウェブブラウザからデスクトップ環境を使ってみた</title><link href="http://blog.tekito.org/2011/01/22/guacamole%E3%81%A7%E3%82%A6%E3%82%A7%E3%83%96%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E3%81%8B%E3%82%89%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E7%92%B0%E5%A2%83%E3%82%92%E4%BD%BF%E3%81%A3/" rel="alternate"></link><updated>2011-01-22T04:26:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2011-01-22:2011/01/22/guacamoleでウェブブラウザからデスクトップ環境を使っ/</id><summary type="html">&lt;p&gt;&lt;a class="reference external" href="http://guacamole.sourceforge.net/"&gt;Guacamole&lt;/a&gt; はHTML5とAjaxで実現されたVNCクライアントです。&lt;/p&gt;
 &lt;p&gt;ウェブブラウザさえあれば、どこからでもアクセスできるし便利そうなので試してみました。&lt;/p&gt;
 &lt;a class="reference external image-reference" href="http://blog.tekito.org/static/data/2011/01/22/guacamole.jpg"&gt;&lt;img alt="Guacamole" src="http://blog.tekito.org/static/data/2011/01/22/guacamole.jpg" style="width: 500px;" /&gt;&lt;/a&gt;
 &lt;p&gt;(Guacamoleを使ってノートPCからデスクトップPCにつないでみた様子。Chromeの中でChromeを立ち上げてしまうセンスの無さ...。)&lt;/p&gt;
@@ -551,7 +554,7 @@ Starting Tomcat servlet engine: tomcat6.
 &lt;p&gt;Wineも使ってあれこれやってみたけど、そっちはうまくいかなかったのでまた今度挑戦しよう。&lt;/p&gt;
 &lt;p&gt;それにしてもGuacamoleって覚えづらい名前だ...。ブラウザから見に行く時に「&lt;a class="reference external" href="http://localhost:8080/gua"&gt;http://localhost:8080/gua&lt;/a&gt;... gua... えーと、なんだっけ？」ってことが何度もあった。&lt;/p&gt;
 &lt;/div&gt;
-</summary><category term="Debian"></category></entry><entry><title>bash のビルトインコマンド “local” について</title><link href="http://blog.tekito.org/2010/11/23/bash-%E3%81%AE%E3%83%93%E3%83%AB%E3%83%88%E3%82%A4%E3%83%B3%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89-local-%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/" rel="alternate"></link><updated>2010-11-23T19:52:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2010-11-23:2010/11/23/bash-のビルトインコマンド-local-について/</id><summary type="html">&lt;p&gt;実験のまとめ。&lt;/p&gt;
+</summary><category term="Debian"></category><category term="Linux"></category></entry><entry><title>bash のビルトインコマンド “local” について</title><link href="http://blog.tekito.org/2010/11/23/bash-%E3%81%AE%E3%83%93%E3%83%AB%E3%83%88%E3%82%A4%E3%83%B3%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89-local-%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/" rel="alternate"></link><updated>2010-11-23T19:52:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2010-11-23:2010/11/23/bash-のビルトインコマンド-local-について/</id><summary type="html">&lt;p&gt;実験のまとめ。&lt;/p&gt;
 &lt;div class="section" id="id1"&gt;
 &lt;h2&gt;前置き&lt;/h2&gt;
 &lt;p&gt;bash では特に指定しない限り、 &lt;em&gt;変数は常にグローバル&lt;/em&gt; な変数として扱われてしまいます。&lt;/p&gt;
@@ -659,7 +662,7 @@ bar
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;bash も将来的にはできるようになるかもしれませんね。&lt;/p&gt;
 &lt;/div&gt;
-</summary><category term="Bash"></category></entry><entry><title>nouveauでデュアルモニタの設定をしてみた</title><link href="http://blog.tekito.org/2010/11/20/nouveau%E3%81%A7%E3%83%87%E3%83%A5%E3%82%A2%E3%83%AB%E3%83%A2%E3%83%8B%E3%82%BF%E3%81%AE%E8%A8%AD%E5%AE%9A%E3%82%92%E3%81%97%E3%81%A6%E3%81%BF%E3%81%9F/" rel="alternate"></link><updated>2010-11-20T18:27:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2010-11-20:2010/11/20/nouveauでデュアルモニタの設定をしてみた/</id><summary type="html">&lt;p&gt;nouveauはNVIDIAのVGA用の非公式ディスプレイドライバで、2.6.33からはカーネルにマージされているらしい。&lt;/p&gt;
+</summary><category term="Bash"></category><category term="Linux"></category></entry><entry><title>nouveauでデュアルモニタの設定をしてみた</title><link href="http://blog.tekito.org/2010/11/20/nouveau%E3%81%A7%E3%83%87%E3%83%A5%E3%82%A2%E3%83%AB%E3%83%A2%E3%83%8B%E3%82%BF%E3%81%AE%E8%A8%AD%E5%AE%9A%E3%82%92%E3%81%97%E3%81%A6%E3%81%BF%E3%81%9F/" rel="alternate"></link><updated>2010-11-20T18:27:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2010-11-20:2010/11/20/nouveauでデュアルモニタの設定をしてみた/</id><summary type="html">&lt;p&gt;nouveauはNVIDIAのVGA用の非公式ディスプレイドライバで、2.6.33からはカーネルにマージされているらしい。&lt;/p&gt;
 &lt;p&gt;デュアルモニタの設定でやることは &lt;em&gt;nouveauの導入&lt;/em&gt; と &lt;em&gt;xorg.confの設定&lt;/em&gt; だけ。&lt;/p&gt;
 &lt;p&gt;検索してもあまり日本語のサイトがヒットしなかったので、メモついでに記事にしときます。&lt;/p&gt;
 &lt;div class="section" id="id1"&gt;
@@ -728,7 +731,7 @@ VGA-1 connected 1920x1080+1920+0 (normal left inverted right x axis y axis) 476m
 &lt;h2&gt;参考&lt;/h2&gt;
 &lt;p&gt;&lt;a class="reference external" href="http://en.gentoo-wiki.com/wiki/X.Org/Dual_Monitors"&gt;X.Org/Dual Monitors - Gentoo Linux Wiki&lt;/a&gt;&lt;/p&gt;
 &lt;/div&gt;
-</summary><category term="Debian"></category></entry><entry><title>WordPressへ移行</title><link href="http://blog.tekito.org/2010/11/15/wordpress%E3%81%B8%E7%A7%BB%E8%A1%8C/" rel="alternate"></link><updated>2010-11-15T23:52:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2010-11-15:2010/11/15/wordpressへ移行/</id><summary type="html">&lt;p&gt;blogger.comからWordPressに移行しました。&lt;/p&gt;
+</summary><category term="Debian"></category><category term="Linux"></category></entry><entry><title>WordPressへ移行</title><link href="http://blog.tekito.org/2010/11/15/wordpress%E3%81%B8%E7%A7%BB%E8%A1%8C/" rel="alternate"></link><updated>2010-11-15T23:52:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2010-11-15:2010/11/15/wordpressへ移行/</id><summary type="html">&lt;p&gt;blogger.comからWordPressに移行しました。&lt;/p&gt;
 &lt;p&gt;bloggerで書いた記事のうちCZ-900のレビュー記事だけはお引越し。&lt;/p&gt;
 </summary></entry><entry><title>ロジクール Illuminated Keyboard CZ-900 レビュー</title><link href="http://blog.tekito.org/2010/02/10/%E3%83%AD%E3%82%B8%E3%82%AF%E3%83%BC%E3%83%AB-illuminated-keyboard-cz-900-%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC/" rel="alternate"></link><updated>2010-02-10T21:53:00+09:00</updated><author><name>Yusaku</name></author><id>tag:blog.tekito.org,2010-02-10:2010/02/10/ロジクール-illuminated-keyboard-cz-900-レビュー/</id><summary type="html">&lt;p&gt;先日 &lt;a class="reference external" href="http://www.logitech.com/index.cfm/keyboards/keyboard/devices/4740&amp;amp;amp;cl=jp,ja"&gt;ロジクール Illuminated Keyboard CZ-900&lt;/a&gt; 購入し、使用しはじめてそろそろ一ヶ月経つので、ここらでレビュー。&lt;/p&gt;
 &lt;p&gt;CZ-900はデザインに凝ったキーボードでもありますが、デザインは好みや利用する場面にも左右されると思うので、この記事では主に &lt;em&gt;利便性や機能的な面&lt;/em&gt; に着目して書きました。「デザインは気に入ったけど...」って方はぜひ参考にしていただけると幸い。&lt;/p&gt;

@@ -6,7 +6,7 @@
                 <meta name="author" content="Yusaku" />
         <meta name="copyright" content="Yusaku" />
         
-                <meta name="keywords" content="C/C++, Linux, " />
+                <meta name="keywords" content="C/C++, Linux, Computing, " />
         <title>シグナルをブロックすると fork() 後の子プロセスもブロックされた状態で生成される  · いままでのこと
 </title>
                 <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
@@ -71,8 +71,10 @@
             <div class="span8 offset2 article-content">
             
             <p>シグナルをブロックした状態で fork() すると、子プロセスもシグナルをブロックした状態で生成されます。</p>
-<div class="highlight"><pre><span class="cp">#include &lt;unistd.h&gt;</span>
+<div class="highlight"><pre><span class="cp">#include &lt;cstdio&gt;</span>
+<span class="cp">#include &lt;cstdlib&gt;</span>
 <span class="cp">#include &lt;csignal&gt;</span>
+<span class="cp">#include &lt;unistd.h&gt;</span>
 <span class="cp">#include &lt;iostream&gt;</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
@@ -88,6 +90,7 @@
     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
         <span class="cm">/* child */</span>
         <span class="kt">sigset_t</span> <span class="n">checkmask</span><span class="p">;</span>
+        <span class="n">sigemptyset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">checkmask</span><span class="p">);</span>
         <span class="n">sigprocmask</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">checkmask</span><span class="p">);</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">sigismember</span><span class="p">(</span><span class="o">&amp;</span><span class="n">checkmask</span><span class="p">,</span> <span class="n">SIGTERM</span><span class="p">))</span> <span class="p">{</span>
             <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;SIGTERM is blocked.&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
@@ -155,11 +158,14 @@ SIGTERM is blocked.
             <h4>Published</h4>
                         <time pubdate="pubdate" datetime="2013-12-03T23:30:00">Dec 3, 2013</time>
                                                 <h4>Category</h4>
-            <a class="category-link" href="/categories.html#Linux-ref">Linux</a> 
+            <a class="category-link" href="/categories.html#Computing-ref">Computing</a> 
                                     <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                                 <li><a href="/tags.html#C/C++-ref">C/C++
                                         <span>1</span>
+                    </a></li>
+                                <li><a href="/tags.html#Linux-ref">Linux
+                                        <span>7</span>
                     </a></li>
                             </ul>
             
